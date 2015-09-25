@@ -114,6 +114,15 @@ int LSM_DLL_EXPORT lsm_disk_sd_path_get(lsm_disk *d,
                                              const char **sd_path);
 
 /**
+ * New in version 1.3. Retrieves a disk's location.
+ * Do not free returned string, free the struct lsm_disk instead.
+ * @param d		Pointer to the disk of interest.
+ * @param location	Pointer to the disk's location.
+ * @return LSM_ERR_OK on success, else error reason.
+ */
+int LSM_DLL_EXPORT lsm_disk_location_get(lsm_disk *d,
+                                             const char **location);
+/**
  * Returns the system id
  * Note: Return value is valid as long as disk pointer is valid.  It gets
  * freed when record is freed.

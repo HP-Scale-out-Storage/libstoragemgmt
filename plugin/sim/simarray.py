@@ -147,7 +147,7 @@ class BackStore(object):
 
     DISK_KEY_LIST = [
         'id', 'name', 'total_space', 'disk_type', 'status',
-        'owner_pool_id', 'role', 'disk_sd_path']
+        'owner_pool_id', 'role', 'disk_sd_path', 'disk_location']
 
     VOL_KEY_LIST = [
         'id', 'vpd83', 'name', 'total_space', 'consumed_size',
@@ -241,6 +241,7 @@ class BackStore(object):
             "status INTEGER NOT NULL, "
             "disk_prefix TEXT NOT NULL, "
             "disk_sd_path TEXT NOT NULL, "
+            "disk_location TEXT NOT NULL, "
             "owner_pool_id INTEGER, "
             # ^ Indicate this disk is used to assemble a pool
             "role TEXT,"
@@ -452,6 +453,7 @@ class BackStore(object):
                     role,
                     status,
                     disk_sd_path,
+                    disk_location,
                     owner_pool_id
                 FROM
                     disks
@@ -673,6 +675,7 @@ class BackStore(object):
                         'disk_type': Disk.TYPE_SATA,
                         'status': Disk.STATUS_OK,
                         'disk_sd_path': "/dev/sda",
+                        'disk_location': "Port: 1I Box: 1 Bay: 1",
                     })
                 pool_1_disks.append(self.lastrowid)
 
@@ -687,6 +690,7 @@ class BackStore(object):
                         'disk_type': Disk.TYPE_SAS,
                         'status': Disk.STATUS_OK,
                         'disk_sd_path': "/dev/sdb",
+                        'disk_location': "Port: 1I Box: 1 Bay: 1",
                     })
                 if len(test_pool_disks) < 2:
                     test_pool_disks.append(self.lastrowid)
@@ -702,6 +706,7 @@ class BackStore(object):
                         'disk_type': Disk.TYPE_SSD,
                         'status': Disk.STATUS_OK,
                         'disk_sd_path': "/dev/sdc",
+                        'disk_location': "Port: 1I Box: 1 Bay: 1",
                     })
                 if len(ssd_pool_disks) < 2:
                     ssd_pool_disks.append(self.lastrowid)
@@ -716,6 +721,7 @@ class BackStore(object):
                         'disk_type': Disk.TYPE_SSD,
                         'status': Disk.STATUS_OK,
                         'disk_sd_path': "/dev/sdd",
+                        'disk_location': "Port: 1I Box: 1 Bay: 1",
                     })
 
             pool_1_id = self.sim_pool_create_from_disk(
@@ -1791,7 +1797,8 @@ class SimArray(object):
             sim_disk['disk_type'], BackStore.BLK_SIZE,
             int(sim_disk['total_space'] / BackStore.BLK_SIZE),
             disk_status, BackStore.SYS_ID,
-            _disk_sd_path=sim_disk['disk_sd_path'])
+            _disk_sd_path=sim_disk['disk_sd_path'],
+            _disk_location=sim_disk['disk_location'])
 
     @_handle_errors
     def disks(self):

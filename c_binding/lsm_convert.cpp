@@ -153,6 +153,18 @@ lsm_disk *value_to_disk(Value & disk)
                                      "disk_sd_path");
             }
         }
+
+        if ((rc != NULL) && (_STD_MAP_HAS_KEY(d, "disk_location") == 1) &&
+            (d["disk_location"].asC_str()[0] != '\0')) {
+            
+            if (lsm_disk_location_set(rc, d["disk_location"].asC_str()) !=
+                LSM_ERR_OK) {
+                lsm_disk_record_free(rc);
+                rc = NULL;
+                throw ValueException("value_to_disk: failed to update "
+                                     "disk_location");
+            }
+        }
     } else {
         throw ValueException("value_to_disk: Not correct type");
     }
@@ -174,6 +186,8 @@ Value disk_to_value(lsm_disk * disk)
         d["system_id"] = Value(disk->system_id);
         if (disk->disk_sd_path != NULL)
             d["disk_sd_path"] = Value(disk->disk_sd_path);
+        if (disk->disk_location != NULL)
+            d["disk_location"] = Value(disk->disk_location);
 
         return Value(d);
     }

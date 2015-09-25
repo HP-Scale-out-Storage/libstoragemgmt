@@ -395,6 +395,16 @@ class TestPlugin(unittest.TestCase):
                                     len(disk_sd_path) > 0,
                                     "Disk scsi device node retrieval failed")
 
+    def test_disk_location_get(self):
+        for s in self.systems:
+            cap = self.c.capabilities(s)
+            if supported(cap, [Cap.DISK_LOCATION]):
+                for disk in self.c.disks():
+                    disk_location = disk.disk_location
+                    self.assertTrue(disk_location is not None and
+                                    len(disk_location) > 0,
+                                    "Disk scsi device node retrieval failed")
+ 
     def _volume_create(self, system_id,
                        element_type=lsm.Pool.ELEMENT_TYPE_VOLUME,
                        unsupported_features=0):

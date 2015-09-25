@@ -161,6 +161,8 @@ typedef enum {
     /**^ Plug-in allows user to retrieve storage mode*/
     LSM_CAP_DISK_SD_PATH = 162,
     /**^ Plugin-in allows user to retrieve scsi device path */
+    LSM_CAP_DISK_LOCATION = 163,
+    /**^ Plug-in allows user to retrieve disk location */
     LSM_CAP_VOLUME_LED = 171,
     /**^ Plugin allows user to set and clear volume LEDs */
 
