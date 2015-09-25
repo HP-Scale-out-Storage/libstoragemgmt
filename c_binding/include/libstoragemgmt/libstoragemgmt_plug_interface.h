@@ -1272,6 +1272,15 @@ int LSM_DLL_EXPORT lsm_disk_location_set(lsm_disk *disk,
                                               const char *location);
 
 /**
+ * New in version 1.3. Set a disk's location.
+ * @param disk		Pointer to the disk of interest.
+ * @param sas_addr	Pointer to the disk's sas address.
+ * @return LSM_ERR_OK on success, else error reason.
+ */
+int LSM_DLL_EXPORT lsm_disk_sas_address_set(lsm_disk *disk,
+                                              const char *sas_addr);
+
+/**
  * Allocated the storage needed for one volume record.
  * @param id                    ID
  * @param name                  Name

@@ -446,6 +446,7 @@ class DisplayData(object):
     DISK_HEADER['system_id'] = 'System ID'
     DISK_HEADER['disk_sd_path'] = "Disk SD Path"
     DISK_HEADER['disk_location'] = "Disk Location"
+    DISK_HEADER['disk_sas_address'] = "Disk SAS Address"
 
     DISK_COLUMN_SKIP_KEYS = ['block_size', 'num_of_blocks']
 

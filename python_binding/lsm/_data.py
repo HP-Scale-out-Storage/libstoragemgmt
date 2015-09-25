@@ -209,7 +209,7 @@ class Disk(IData):
 
     def __init__(self, _id, _name, _disk_type, _block_size, _num_of_blocks,
                  _status, _system_id, _plugin_data=None, _disk_sd_path='',
-                 _disk_location=''):
+                 _disk_location='', _disk_sas_address=''):
         self._id = _id
         self._name = _name
         self._disk_type = _disk_type
@@ -220,6 +220,7 @@ class Disk(IData):
         self._plugin_data = _plugin_data
         self._disk_sd_path = _disk_sd_path
         self._disk_location = _disk_location
+        self._disk_sas_address = _disk_sas_address
 
     @property
     def size_bytes(self):
@@ -252,6 +253,18 @@ class Disk(IData):
     def __str__(self):
         return self.name
 
+    @property
+    def disk_sas_address(self):
+        """
+        Disk sas address.
+        """
+        if self._disk_sas_address == '':
+            raise LsmError(ErrorNumber.NO_SUPPORT,
+                           "Disk.disk_sas_address() is not supported by this "
+                           "plugin yet")
+        return self._disk_sas_address
+    def __str__(self):
+        return self.name
 
 # Lets do this once outside of the class to minimize the number of
 # times it needs to be compiled.
@@ -822,6 +835,7 @@ class Capabilities(IData):
     SYS_MODE_GET = 161
     DISK_SD_PATH = 162
     DISK_LOCATION = 163
+    DISK_SAS_ADDR = 164
     VOLUME_LED = 171
 
     POOLS_QUICK_SEARCH = 210

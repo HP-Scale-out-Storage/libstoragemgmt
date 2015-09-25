@@ -278,6 +278,7 @@ struct LSM_DLL_LOCAL _lsm_disk {
     char *system_id;
     const char *disk_sd_path;
     const char *disk_location;
+    const char *disk_sas_address;
 };
 
 #define LSM_HASH_MAGIC     0xAA7A0011

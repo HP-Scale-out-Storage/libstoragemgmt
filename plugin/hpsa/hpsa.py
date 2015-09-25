@@ -346,6 +346,7 @@ class SmartArray(IPlugin):
         cap.set(Capabilities.SYS_FW_VERSION_GET)
         cap.set(Capabilities.DISK_SD_PATH)
         cap.set(Capabilities.DISK_LOCATION)
+        cap.set(Capabilities.DISK_SAS_ADDR)
         cap.set(Capabilities.VOLUME_LED)
         return cap
 
@@ -526,9 +527,15 @@ class SmartArray(IPlugin):
                         "/sys/block/%s/device/path_info" % sd_name)
                 except IOError:
                     disk_location = "-"
+                try:
+                    disk_sas_address = file_read(
+                        "/sys/block/%s/device/sas_address" % sd_name)
+                except IOError:
+                    disk_sas_address = "-"
         else:
             disk_sd_path = "-"
             disk_location = "-"
+            disk_sas_address = "-"
         
         status = _disk_status_of(hp_disk, flag_free)
         plugin_data = "%s:%s" % (ctrl_num, disk_num)
@@ -536,7 +543,7 @@ class SmartArray(IPlugin):
         return Disk(
             disk_id, disk_name, disk_type, blk_size, blk_count, status,
             sys_id, plugin_data, _disk_sd_path=disk_sd_path,
-            _disk_location=disk_location)
+            _disk_location=disk_location, _disk_sas_address=disk_sas_address)
 
     @_handle_errors
     def disks(self, search_key=None, search_value=None,

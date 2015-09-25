@@ -708,6 +708,7 @@ lsm_disk *lsm_disk_record_alloc(const char *id, const char *name,
         rc->system_id = strdup(system_id);
         rc->disk_sd_path = NULL;
         rc->disk_location = NULL;
+        rc->disk_sas_address = NULL;
 
         if (!rc->id || !rc->name || !rc->system_id) {
             lsm_disk_record_free(rc);
@@ -953,6 +954,12 @@ lsm_disk *lsm_disk_record_copy(lsm_disk * disk)
         rc = NULL;
     }
 
+    if ((disk->disk_sas_address != NULL) &&
+        (lsm_disk_sas_address_set(rc, disk->disk_sas_address) != LSM_ERR_OK)) {
+        lsm_disk_record_free(rc);
+        rc = NULL;
+    }
+
     return rc;
 }
 
@@ -976,6 +983,9 @@ int lsm_disk_record_free(lsm_disk * d)
         if (d->disk_location != NULL)
             free((char *) d->disk_location);
         
+        if (d->disk_sas_address != NULL)
+            free((char *) d->disk_sas_address);
+
         free(d);
         return LSM_ERR_OK;
     }
@@ -1108,6 +1118,37 @@ int lsm_disk_location_get(lsm_disk * disk, const char **location)
     *location = disk->disk_location;
 
     if (disk->disk_location[0] != '\0')
+        return LSM_ERR_OK;
+    else
+        return LSM_ERR_NO_SUPPORT;
+}
+
+int lsm_disk_sas_address_set(lsm_disk * disk, const char *sas_addr)
+{
+    if ((disk == NULL) || (sas_addr == NULL) || (sas_addr[0] == '\0'))
+        return LSM_ERR_INVALID_ARGUMENT;
+
+    if (disk->disk_sas_address != NULL)
+        free((char *) disk->disk_sas_address);
+    disk->disk_sas_address = strdup(sas_addr);
+    if (disk->disk_sas_address == NULL)
+        return LSM_ERR_NO_MEMORY;
+
+    return LSM_ERR_OK;
+}
+
+int lsm_disk_sas_address_get(lsm_disk * disk, const char **sas_addr)
+{
+    if ((disk == NULL) || (sas_addr == NULL))
+        return LSM_ERR_INVALID_ARGUMENT;
+
+    if (!LSM_IS_DISK(disk)) {
+        return LSM_ERR_INVALID_ARGUMENT;
+    }
+
+    *sas_addr = disk->disk_sas_address;
+
+    if (disk->disk_sas_address[0] != '\0')
         return LSM_ERR_OK;
     else
         return LSM_ERR_NO_SUPPORT;
