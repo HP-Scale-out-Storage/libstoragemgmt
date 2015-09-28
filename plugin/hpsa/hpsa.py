@@ -173,6 +173,56 @@ def _parse_hpssacli_output(output):
 
     return data
 
+def _parse_lsscsi_output(output):
+    """
+    Parse each lsscsi line based on predefined regex matching
+    """
+
+    data = []
+    output_lines = [
+        l for l in output.split("\n")]
+
+    for line_num in range(len(output_lines)):
+        cur_line = output_lines[line_num]
+        lsscsi_entry = {}
+        sd_path = re.compile(
+            "/dev/(sd[a-z]+)").search(cur_line)
+        if sd_path is not None:
+            lsscsi_entry['sd_path'] = sd_path.group(0)
+        else:
+            continue
+        sg_path = re.compile(
+            "/dev/(sg[0-9]+)").search(cur_line)
+        if sg_path is not None:
+            lsscsi_entry['sg_path'] = sg_path.group(0)
+        else:
+            continue
+        sas_addr = re.compile(
+            "sas:(0x[A-Fa-f0-9]+)").search(cur_line)
+        if sas_addr is not None:
+            lsscsi_entry['sas_addr'] = sas_addr.group(0)
+        else:
+            continue
+        dev_type = re.compile(
+            "\[\d+\:\d+\:\d+\:\d+\]\s+(\w+)\s+").search(cur_line)
+        if dev_type is not None:
+            lsscsi_entry['dev_type'] = dev_type.group(0)
+        else:
+            continue
+        data.append(lsscsi_entry)
+
+    return data
+
+def _get_sg_path(lsscsi_tg_output, sd_path):
+    """
+    Call lsscsi, look for a match with passed sd_node argument
+    """
+    for entry in lsscsi_tg_output:
+        if (entry['sd_path'] == sd_path):
+            return entry['sg_path']
+
+    return "-"
+
 
 def _hp_size_to_lsm(hp_size):
     """
@@ -276,9 +326,12 @@ def _lsm_raid_type_to_hp(raid_type):
 class SmartArray(IPlugin):
     _DEFAULT_BIN_PATHS = [
         "/usr/sbin/hpssacli", "/opt/hp/hpssacli/bld/hpssacli"]
+    _DEFAULT_BIN_PATHS_LSSCSI = [
+        "/usr/bin/lsscsi", "/usr/sbin/lsscsi"]
 
     def __init__(self):
         self._sacli_bin = None
+        self._lsscsi_bin = None
 
     def _find_sacli(self):
         """
@@ -293,6 +346,19 @@ class SmartArray(IPlugin):
                 ErrorNumber.INVALID_ARGUMENT,
                 "SmartArray sacli is not installed correctly")
 
+    def _find_lsscsi(self):
+        """
+        Try _DEFAULT_MDADM_BIN_PATHS
+        """
+        for cur_path in SmartArray._DEFAULT_BIN_PATHS_LSSCSI:
+            if os.path.lexists(cur_path):
+                self._lsscsi_bin = cur_path
+
+        if not self._lsscsi_bin:
+            raise LsmError(
+                ErrorNumber.INVALID_ARGUMENT,
+                "lsscsi is not installed correctly")
+
     @_handle_errors
     def plugin_register(self, uri, password, timeout, flags=Client.FLAG_RSVD):
         if os.geteuid() != 0:
@@ -303,6 +369,8 @@ class SmartArray(IPlugin):
         self._sacli_bin = uri_parsed.get('parameters', {}).get('hpssacli')
         if not self._sacli_bin:
             self._find_sacli()
+        if not self._lsscsi_bin:
+            self._find_lsscsi()
 
         self._sacli_exec(['version'], flag_convert=False)
 
@@ -345,6 +413,7 @@ class SmartArray(IPlugin):
         cap.set(Capabilities.VOLUME_RAID_CREATE)
         cap.set(Capabilities.SYS_FW_VERSION_GET)
         cap.set(Capabilities.DISK_SD_PATH)
+        cap.set(Capabilities.DISK_SG_PATH)
         cap.set(Capabilities.DISK_LOCATION)
         cap.set(Capabilities.DISK_SAS_ADDR)
         cap.set(Capabilities.VOLUME_LED)
@@ -368,6 +437,27 @@ class SmartArray(IPlugin):
 
         if flag_convert:
             return _parse_hpssacli_output(output)
+        else:
+            return output
+
+    def _lsscsi_exec(self, lsscsi_cmds, flag_convert=True):
+        """
+        If flag_convert is True, convert data into dict.
+        """
+        lsscsi_cmds.insert(0, self._lsscsi_bin)
+        try:
+            output = cmd_exec(lsscsi_cmds)
+        except OSError as os_error:
+            if os_error.errno == errno.ENOENT:
+                raise LsmError(
+                    ErrorNumber.INVALID_ARGUMENT,
+                    "lsscsi binary '%s' is not exist or executable." %
+                    self._lsscsi_bin)
+            else:
+                raise
+
+        if flag_convert:
+            return _parse_lsscsi_output(output)
         else:
             return output
 
@@ -508,7 +598,7 @@ class SmartArray(IPlugin):
         return search_property(lsm_vols, search_key, search_value)
 
     @staticmethod
-    def _hp_disk_to_lsm_disk(hp_disk, sys_id, ctrl_num, key_name,
+    def _hp_disk_to_lsm_disk(hp_disk, lsscsi_tg_out, sys_id, ctrl_num, key_name,
                              flag_free=False):
         disk_id = hp_disk['Serial Number']
         disk_num = key_name[len("physicaldrive "):]
@@ -517,8 +607,10 @@ class SmartArray(IPlugin):
         blk_size = int(hp_disk['Native Block Size'])
         blk_count = int(_hp_size_to_lsm(hp_disk['Size']) / blk_size)
 
+
         if 'Disk Name' in hp_disk.keys():
             disk_sd_path = hp_disk['Disk Name']
+            disk_sg_path = _get_sg_path(lsscsi_tg_out, disk_sd_path)
             regex_match = re.compile("/dev/(sd[a-z]+)").search(disk_sd_path)
             if regex_match:
                 sd_name = regex_match.group(1)
@@ -534,6 +626,7 @@ class SmartArray(IPlugin):
                     disk_sas_address = "-"
         else:
             disk_sd_path = "-"
+            disk_sg_path = "-"
             disk_location = "-"
             disk_sas_address = "-"
         
@@ -543,7 +636,8 @@ class SmartArray(IPlugin):
         return Disk(
             disk_id, disk_name, disk_type, blk_size, blk_count, status,
             sys_id, plugin_data, _disk_sd_path=disk_sd_path,
-            _disk_location=disk_location, _disk_sas_address=disk_sas_address)
+            _disk_sg_path=disk_sg_path, _disk_location=disk_location,
+            _disk_sas_address=disk_sas_address)
 
     @_handle_errors
     def disks(self, search_key=None, search_value=None,
@@ -556,6 +650,8 @@ class SmartArray(IPlugin):
         rc_lsm_disks = []
         ctrl_all_conf = self._sacli_exec(
             ["ctrl", "all", "show", "config", "detail"])
+        lsscsi_tg_output = self._lsscsi_exec(
+            ["-tg"])
         for ctrl_data in ctrl_all_conf.values():
             sys_id = ctrl_data['Serial Number']
             ctrl_num = ctrl_data['Slot']
@@ -566,6 +662,7 @@ class SmartArray(IPlugin):
                             rc_lsm_disks.append(
                                 SmartArray._hp_disk_to_lsm_disk(
                                     ctrl_data[key_name][array_key_name],
+                                    lsscsi_tg_output,
                                     sys_id, ctrl_num, array_key_name,
                                     flag_free=False))
 
@@ -575,6 +672,7 @@ class SmartArray(IPlugin):
                             rc_lsm_disks.append(
                                 SmartArray._hp_disk_to_lsm_disk(
                                     ctrl_data[key_name][array_key_name],
+                                    lsscsi_tg_output,
                                     sys_id, ctrl_num, array_key_name,
                                     flag_free=True))
 

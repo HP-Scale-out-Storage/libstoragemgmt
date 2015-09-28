@@ -277,6 +277,7 @@ struct LSM_DLL_LOCAL _lsm_disk {
     uint64_t disk_status;       /* Bit field */
     char *system_id;
     const char *disk_sd_path;
+    const char *disk_sg_path;
     const char *disk_location;
     const char *disk_sas_address;
 };

@@ -395,6 +395,16 @@ class TestPlugin(unittest.TestCase):
                                     len(disk_sd_path) > 0,
                                     "Disk scsi device node retrieval failed")
 
+    def test_disk_sg_path_get(self):
+        for s in self.systems:
+            cap = self.c.capabilities(s)
+            if supported(cap, [Cap.DISK_SG_PATH]):
+                for disk in self.c.disks():
+                    disk_sg_path = disk.disk_sg_path
+                    self.assertTrue(disk_sg_path is not None and
+                                    len(disk_sg_path) > 0,
+                                    "Disk scsi generic node retrieval failed")
+
     def test_disk_location_get(self):
         for s in self.systems:
             cap = self.c.capabilities(s)

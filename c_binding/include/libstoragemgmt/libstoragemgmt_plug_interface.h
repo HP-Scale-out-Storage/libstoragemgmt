@@ -1263,6 +1263,15 @@ int LSM_DLL_EXPORT lsm_disk_sd_path_set(lsm_disk *disk,
                                               const char *sd_path);
 
 /**
+ * New in version 1.3. Set a disk's scsi generic path.
+ * @param disk		Pointer to the disk of interest.
+ * @param sg_path	Pointer to the disk's scsi generic path.
+ * @return LSM_ERR_OK on success, else error reason.
+ */
+int LSM_DLL_EXPORT lsm_disk_sg_path_set(lsm_disk *disk,
+                                              const char *sg_path);
+
+/**
  * New in version 1.3. Set a disk's location.
  * @param disk		Pointer to the disk of interest.
  * @param disk_path	Pointer to the disk's location.

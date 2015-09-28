@@ -209,7 +209,7 @@ class Disk(IData):
 
     def __init__(self, _id, _name, _disk_type, _block_size, _num_of_blocks,
                  _status, _system_id, _plugin_data=None, _disk_sd_path='',
-                 _disk_location='', _disk_sas_address=''):
+                 _disk_sg_path='', _disk_location='', _disk_sas_address=''):
         self._id = _id
         self._name = _name
         self._disk_type = _disk_type
@@ -219,6 +219,7 @@ class Disk(IData):
         self._system_id = _system_id
         self._plugin_data = _plugin_data
         self._disk_sd_path = _disk_sd_path
+        self._disk_sg_path = _disk_sg_path
         self._disk_location = _disk_location
         self._disk_sas_address = _disk_sas_address
 
@@ -239,6 +240,17 @@ class Disk(IData):
                            "Disk.sd_path() is not supported by this "
                            "plugin yet")
         return self._disk_sd_path
+
+    @property
+    def disk_sg_path(self):
+        """
+        scsi device node path.
+        """
+        if self._disk_sg_path == '':
+            raise LsmError(ErrorNumber.NO_SUPPORT,
+                           "Disk.sg_path() is not supported by this "
+                           "plugin yet")
+        return self._disk_sg_path
 
     @property
     def disk_location(self):
@@ -836,6 +848,7 @@ class Capabilities(IData):
     DISK_SD_PATH = 162
     DISK_LOCATION = 163
     DISK_SAS_ADDR = 164
+    DISK_SG_PATH = 165
     VOLUME_LED = 171
 
     POOLS_QUICK_SEARCH = 210

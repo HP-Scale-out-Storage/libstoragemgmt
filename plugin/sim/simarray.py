@@ -147,8 +147,8 @@ class BackStore(object):
 
     DISK_KEY_LIST = [
         'id', 'name', 'total_space', 'disk_type', 'status',
-        'owner_pool_id', 'role', 'disk_sd_path', 'disk_location',
-        'disk_sas_address']
+        'owner_pool_id', 'role', 'disk_sd_path', 'disk_sg_path',
+        'disk_location', 'disk_sas_address']
 
     VOL_KEY_LIST = [
         'id', 'vpd83', 'name', 'total_space', 'consumed_size',
@@ -242,6 +242,7 @@ class BackStore(object):
             "status INTEGER NOT NULL, "
             "disk_prefix TEXT NOT NULL, "
             "disk_sd_path TEXT NOT NULL, "
+            "disk_sg_path TEXT NOT NULL, "
             "disk_location TEXT NOT NULL, "
             "disk_sas_address TEXT NOT NULL, "
             "owner_pool_id INTEGER, "
@@ -455,6 +456,7 @@ class BackStore(object):
                     role,
                     status,
                     disk_sd_path,
+                    disk_sg_path,
                     disk_location,
                     disk_sas_address,
                     owner_pool_id
@@ -678,6 +680,7 @@ class BackStore(object):
                         'disk_type': Disk.TYPE_SATA,
                         'status': Disk.STATUS_OK,
                         'disk_sd_path': "/dev/sda",
+                        'disk_sg_path': "/dev/sg0",
                         'disk_location': "Port: 1I Box: 1 Bay: 1",
                         'disk_sas_address': "0x0123456789ABCDEF",
                     })
@@ -694,6 +697,7 @@ class BackStore(object):
                         'disk_type': Disk.TYPE_SAS,
                         'status': Disk.STATUS_OK,
                         'disk_sd_path': "/dev/sdb",
+                        'disk_sg_path': "/dev/sg1",
                         'disk_location': "Port: 1I Box: 1 Bay: 1",
                         'disk_sas_address': "0x0123456789ABCDEF",
                     })
@@ -711,6 +715,7 @@ class BackStore(object):
                         'disk_type': Disk.TYPE_SSD,
                         'status': Disk.STATUS_OK,
                         'disk_sd_path': "/dev/sdc",
+                        'disk_sg_path': "/dev/sg2",
                         'disk_location': "Port: 1I Box: 1 Bay: 1",
                         'disk_sas_address': "0x0123456789ABCDEF",
                     })
@@ -727,6 +732,7 @@ class BackStore(object):
                         'disk_type': Disk.TYPE_SSD,
                         'status': Disk.STATUS_OK,
                         'disk_sd_path': "/dev/sdd",
+                        'disk_sg_path': "/dev/sg3",
                         'disk_location': "Port: 1I Box: 1 Bay: 1",
                         'disk_sas_address': "0x0123456789ABCDEF",
                     })
@@ -1805,6 +1811,7 @@ class SimArray(object):
             int(sim_disk['total_space'] / BackStore.BLK_SIZE),
             disk_status, BackStore.SYS_ID,
             _disk_sd_path=sim_disk['disk_sd_path'],
+            _disk_sg_path=sim_disk['disk_sg_path'],
             _disk_location=sim_disk['disk_location'],
             _disk_sas_address=sim_disk['disk_sas_address'])
 

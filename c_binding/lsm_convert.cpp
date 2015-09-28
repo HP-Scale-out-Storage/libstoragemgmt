@@ -154,6 +154,18 @@ lsm_disk *value_to_disk(Value & disk)
             }
         }
 
+        if ((rc != NULL) && (_STD_MAP_HAS_KEY(d, "disk_sg_path") == 1) &&
+            (d["disk_sg_path"].asC_str()[0] != '\0')) {
+            
+            if (lsm_disk_sg_path_set(rc, d["disk_sg_path"].asC_str()) !=
+                LSM_ERR_OK) {
+                lsm_disk_record_free(rc);
+                rc = NULL;
+                throw ValueException("value_to_disk: failed to update "
+                                     "disk_sg_path");
+            }
+        }
+
         if ((rc != NULL) && (_STD_MAP_HAS_KEY(d, "disk_location") == 1) &&
             (d["disk_location"].asC_str()[0] != '\0')) {
             
@@ -198,6 +210,8 @@ Value disk_to_value(lsm_disk * disk)
         d["system_id"] = Value(disk->system_id);
         if (disk->disk_sd_path != NULL)
             d["disk_sd_path"] = Value(disk->disk_sd_path);
+        if (disk->disk_sg_path != NULL)
+            d["disk_sg_path"] = Value(disk->disk_sg_path);
         if (disk->disk_location != NULL)
             d["disk_location"] = Value(disk->disk_location);
         if (disk->disk_sas_address != NULL)

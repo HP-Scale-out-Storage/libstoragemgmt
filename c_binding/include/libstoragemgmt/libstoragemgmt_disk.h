@@ -114,6 +114,16 @@ int LSM_DLL_EXPORT lsm_disk_sd_path_get(lsm_disk *d,
                                              const char **sd_path);
 
 /**
+ * New in version 1.3. Retrieves a disk's scsi generic path.
+ * Do not free returned string, free the struct lsm_disk instead.
+ * @param d		Pointer to the disk of interest.
+ * @param sg_path	Pointer to the disk's scsi generic path.
+ * @return LSM_ERR_OK on success, else error reason.
+ */
+
+int LSM_DLL_EXPORT lsm_disk_sg_path_get(lsm_disk *d,
+                                             const char **sg_path);
+/**
  * New in version 1.3. Retrieves a disk's location.
  * Do not free returned string, free the struct lsm_disk instead.
  * @param d		Pointer to the disk of interest.

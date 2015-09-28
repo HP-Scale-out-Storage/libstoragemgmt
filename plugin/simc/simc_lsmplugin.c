@@ -39,6 +39,7 @@ static char name[] = "Compiled plug-in example";
 static char version[] = "0.2.0";
 static char sys_id[] = "sim-01";
 static char disk_sd_path[] = "/dev/sdaz";
+static char disk_sg_path[] = "/dev/sg51";
 static char disk_location[] = "Port: 2E Box: 3 Bay: 12";
 static char disk_sas_address[] = "0xFEDCBA9876543210";
 
@@ -2374,6 +2375,7 @@ int load(lsm_plugin_ptr c, const char *uri, const char *password,
                                       512, 0x8000000000000,
                                       LSM_DISK_STATUS_OK, sys_id);
             lsm_disk_sd_path_set(d, disk_sd_path);
+            lsm_disk_sg_path_set(d, disk_sg_path);
             lsm_disk_location_set(d, disk_location);
             lsm_disk_sas_address_set(d, disk_sas_address);
 
