@@ -42,6 +42,7 @@ static char disk_sd_path[] = "/dev/sdaz";
 static char disk_sg_path[] = "/dev/sg51";
 static char disk_location[] = "Port: 2E Box: 3 Bay: 12";
 static char disk_sas_address[] = "0xFEDCBA9876543210";
+static char disk_sep_sas_address[] = "0xFEDCBA9876543000";
 
 #define BS 512
 #define MAX_SYSTEMS 1
@@ -2378,6 +2379,7 @@ int load(lsm_plugin_ptr c, const char *uri, const char *password,
             lsm_disk_sg_path_set(d, disk_sg_path);
             lsm_disk_location_set(d, disk_location);
             lsm_disk_sas_address_set(d, disk_sas_address);
+            lsm_disk_sep_sas_address_set(d, disk_sep_sas_address);
 
             key = strdup(lsm_disk_id_get(d));
 

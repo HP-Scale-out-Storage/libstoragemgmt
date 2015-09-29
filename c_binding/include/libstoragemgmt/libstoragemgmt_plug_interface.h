@@ -1290,6 +1290,15 @@ int LSM_DLL_EXPORT lsm_disk_sas_address_set(lsm_disk *disk,
                                               const char *sas_addr);
 
 /**
+ * New in version 1.3. Set a disk's sep sas address.
+ * @param disk		Pointer to the disk of interest.
+ * @param sas_addr	Pointer to the disk's sep sas address.
+ * @return LSM_ERR_OK on success, else error reason.
+ */
+int LSM_DLL_EXPORT lsm_disk_sep_sas_address_set(lsm_disk *disk,
+                                              const char *sep_sas_addr);
+
+/**
  * Allocated the storage needed for one volume record.
  * @param id                    ID
  * @param name                  Name

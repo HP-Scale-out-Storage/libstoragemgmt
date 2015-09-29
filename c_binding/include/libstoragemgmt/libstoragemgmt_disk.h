@@ -144,6 +144,16 @@ int LSM_DLL_EXPORT lsm_disk_sas_address_get(lsm_disk *d,
                                              const char **sas_addr);
 
 /**
+ * New in version 1.3. Retrieves a disk's sep sas address.
+ * Do not free returned string, free the struct lsm_disk instead.
+ * @param d		Pointer to the disk of interest.
+ * @param sep_sas_addr	Pointer to the disk's sep sas address.
+ * @return LSM_ERR_OK on success, else error reason.
+ */
+
+int LSM_DLL_EXPORT lsm_disk_sep_sas_address_get(lsm_disk *d,
+                                             const char **sep_sas_addr);
+/**
  * Returns the system id
  * Note: Return value is valid as long as disk pointer is valid.  It gets
  * freed when record is freed.
