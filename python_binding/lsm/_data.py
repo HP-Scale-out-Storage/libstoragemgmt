@@ -210,7 +210,7 @@ class Disk(IData):
     def __init__(self, _id, _name, _disk_type, _block_size, _num_of_blocks,
                  _status, _system_id, _plugin_data=None, _disk_sd_path='',
                  _disk_sg_path='', _disk_location='', _disk_sas_address='',
-                 _disk_sep_sas_address=''):
+                 _disk_sep_sas_address='', _disk_sep_sg_path=''):
         self._id = _id
         self._name = _name
         self._disk_type = _disk_type
@@ -224,6 +224,7 @@ class Disk(IData):
         self._disk_location = _disk_location
         self._disk_sas_address = _disk_sas_address
         self._disk_sep_sas_address = _disk_sep_sas_address
+        self._disk_sep_sg_path = _disk_sep_sg_path
 
     @property
     def size_bytes(self):
@@ -286,6 +287,17 @@ class Disk(IData):
                            "Disk.disk_sep_sas_address() is not supported by "
                            "this plugin yet")
         return self._disk_sep_sas_address
+
+    @property
+    def disk_sep_sg_path(self):
+        """
+        scsi device node path.
+        """
+        if self._disk_sep_sg_path == '':
+            raise LsmError(ErrorNumber.NO_SUPPORT,
+                           "Disk.disk_sep_sg_path() is not supported by this "
+                           "plugin yet")
+        return self._disk_sep_sg_path
 
     def __str__(self):
         return self.name
@@ -862,6 +874,7 @@ class Capabilities(IData):
     DISK_SAS_ADDR = 164
     DISK_SG_PATH = 165
     DISK_SEP_SAS_ADDR = 166
+    DISK_SEP_SG_PATH = 167
     VOLUME_LED = 171
 
     POOLS_QUICK_SEARCH = 210

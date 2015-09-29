@@ -1299,6 +1299,15 @@ int LSM_DLL_EXPORT lsm_disk_sep_sas_address_set(lsm_disk *disk,
                                               const char *sep_sas_addr);
 
 /**
+ * New in version 1.3. Set a disk's sep scsi generic path.
+ * @param disk		Pointer to the disk of interest.
+ * @param sep_sg_path	Pointer to the disk's sep scsi generic path.
+ * @return LSM_ERR_OK on success, else error reason.
+ */
+int LSM_DLL_EXPORT lsm_disk_sep_sg_path_set(lsm_disk *disk,
+                                              const char *sep_sg_path);
+
+/**
  * Allocated the storage needed for one volume record.
  * @param id                    ID
  * @param name                  Name

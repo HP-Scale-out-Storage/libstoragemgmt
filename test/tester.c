@@ -1281,6 +1281,43 @@ START_TEST(test_disk_sep_sas_address)
 }
 END_TEST
 
+START_TEST(test_disk_sep_sg_path)
+{
+    uint32_t count = 0;
+    lsm_disk **d = NULL;
+    const char *sep_sg_path = NULL;
+    int i = 0;
+
+    fail_unless(c!=NULL);
+
+    int rc = lsm_disk_list(c, NULL, NULL, &d, &count, 0);
+
+    if( LSM_ERR_OK == rc ) {
+        fail_unless(LSM_ERR_OK == rc, "%d", rc);
+        fail_unless(count >= 1);
+
+        for( i = 0; i < count; ++i ) {
+            G(rc, lsm_disk_sep_sg_path_get, d[i], &sep_sg_path);
+
+            if (LSM_ERR_OK == rc)
+                printf("SEP SCSI generic path: (%s)\n", sep_sg_path);
+
+            rc = lsm_disk_sep_sg_path_get(d[i], NULL);
+            fail_unless(LSM_ERR_INVALID_ARGUMENT == rc, "rc = %d", rc);
+
+        }
+
+        rc = lsm_disk_sep_sg_path_get(NULL, &sep_sg_path);
+        fail_unless(LSM_ERR_INVALID_ARGUMENT == rc, "rc = %d", rc);
+
+        lsm_disk_record_array_free(d, count);
+    } else {
+        fail_unless(d == NULL);
+        fail_unless(count == 0);
+    }
+}
+END_TEST
+
 START_TEST(test_nfs_exports)
 {
     fail_unless(c != NULL);
@@ -3349,6 +3386,7 @@ Suite * lsm_suite(void)
     tcase_add_test(basic, test_disk_location);
     tcase_add_test(basic, test_disk_sas_address);
     tcase_add_test(basic, test_disk_sep_sas_address);
+    tcase_add_test(basic, test_disk_sep_sg_path);
     tcase_add_test(basic, test_plugin_info);
     tcase_add_test(basic, test_system_fw_version);
     tcase_add_test(basic, test_system_mode);

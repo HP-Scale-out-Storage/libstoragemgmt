@@ -435,6 +435,17 @@ class TestPlugin(unittest.TestCase):
                                     len(disk_sep_sas_address) > 0,
                                     "Disk sep sas address retrieval failed")
 
+    def test_disk_sep_sg_path_get(self):
+        for s in self.systems:
+            cap = self.c.capabilities(s)
+            if supported(cap, [Cap.DISK_SEP_SG_PATH]):
+                for disk in self.c.disks():
+                    disk_sep_sg_path = disk.disk_sep_sg_path
+                    self.assertTrue(disk_sep_sg_path is not None and
+                                    len(disk_sep_sg_path) > 0,
+                                    "Disk sep scsi generic node retrieval"
+                                    "failed")
+
     def _volume_create(self, system_id,
                        element_type=lsm.Pool.ELEMENT_TYPE_VOLUME,
                        unsupported_features=0):

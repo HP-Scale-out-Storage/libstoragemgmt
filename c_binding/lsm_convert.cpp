@@ -203,6 +203,18 @@ lsm_disk *value_to_disk(Value & disk)
                                      "disk_sep_sas_address");
             }
         }
+
+        if ((rc != NULL) && (_STD_MAP_HAS_KEY(d, "disk_sep_sg_path") == 1) &&
+            (d["disk_sep_sg_path"].asC_str()[0] != '\0')) {
+            
+            if (lsm_disk_sep_sg_path_set(rc, d["disk_sep_sg_path"].asC_str()) !=
+                LSM_ERR_OK) {
+                lsm_disk_record_free(rc);
+                rc = NULL;
+                throw ValueException("value_to_disk: failed to update "
+                                     "disk_sep_sg_path");
+            }
+        }
     } else {
         throw ValueException("value_to_disk: Not correct type");
     }
@@ -232,6 +244,8 @@ Value disk_to_value(lsm_disk * disk)
             d["disk_sas_address"] = Value(disk->disk_sas_address);
         if (disk->disk_sep_sas_address != NULL)
             d["disk_sep_sas_address"] = Value(disk->disk_sep_sas_address);
+        if (disk->disk_sep_sg_path != NULL)
+            d["disk_sep_sg_path"] = Value(disk->disk_sep_sg_path);
 
         return Value(d);
     }

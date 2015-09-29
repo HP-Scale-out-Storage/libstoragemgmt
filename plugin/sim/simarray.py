@@ -148,7 +148,8 @@ class BackStore(object):
     DISK_KEY_LIST = [
         'id', 'name', 'total_space', 'disk_type', 'status',
         'owner_pool_id', 'role', 'disk_sd_path', 'disk_sg_path',
-        'disk_location', 'disk_sas_address', 'disk_sep_sas_address']
+        'disk_location', 'disk_sas_address', 'disk_sep_sas_address',
+        'disk_sep_sg_path']
 
     VOL_KEY_LIST = [
         'id', 'vpd83', 'name', 'total_space', 'consumed_size',
@@ -246,6 +247,7 @@ class BackStore(object):
             "disk_location TEXT NOT NULL, "
             "disk_sas_address TEXT NOT NULL, "
             "disk_sep_sas_address TEXT NOT NULL, "
+            "disk_sep_sg_path TEXT NOT NULL, "
             "owner_pool_id INTEGER, "
             # ^ Indicate this disk is used to assemble a pool
             "role TEXT,"
@@ -461,6 +463,7 @@ class BackStore(object):
                     disk_location,
                     disk_sas_address,
                     disk_sep_sas_address,
+                    disk_sep_sg_path,
                     owner_pool_id
                 FROM
                     disks
@@ -686,6 +689,7 @@ class BackStore(object):
                         'disk_location': "Port: 1I Box: 1 Bay: 1",
                         'disk_sas_address': "0x0123456789ABCDEF",
                         'disk_sep_sas_address': "0x0123456789ABCD00",
+                        'disk_sep_sg_path': "/dev/sg70",
                     })
                 pool_1_disks.append(self.lastrowid)
 
@@ -704,6 +708,7 @@ class BackStore(object):
                         'disk_location': "Port: 1I Box: 1 Bay: 1",
                         'disk_sas_address': "0x0123456789ABCDEF",
                         'disk_sep_sas_address': "0x0123456789ABCD00",
+                        'disk_sep_sg_path': "/dev/sg70",
                     })
                 if len(test_pool_disks) < 2:
                     test_pool_disks.append(self.lastrowid)
@@ -723,6 +728,7 @@ class BackStore(object):
                         'disk_location': "Port: 1I Box: 1 Bay: 1",
                         'disk_sas_address': "0x0123456789ABCDEF",
                         'disk_sep_sas_address': "0x0123456789ABCD00",
+                        'disk_sep_sg_path': "/dev/sg70",
                     })
                 if len(ssd_pool_disks) < 2:
                     ssd_pool_disks.append(self.lastrowid)
@@ -741,6 +747,7 @@ class BackStore(object):
                         'disk_location': "Port: 1I Box: 1 Bay: 1",
                         'disk_sas_address': "0x0123456789ABCDEF",
                         'disk_sep_sas_address': "0x0123456789ABCD00",
+                        'disk_sep_sg_path': "/dev/sg70",
                     })
 
             pool_1_id = self.sim_pool_create_from_disk(
@@ -1820,7 +1827,8 @@ class SimArray(object):
             _disk_sg_path=sim_disk['disk_sg_path'],
             _disk_location=sim_disk['disk_location'],
             _disk_sas_address=sim_disk['disk_sas_address'],
-            _disk_sep_sas_address=sim_disk['disk_sep_sas_address'])
+            _disk_sep_sas_address=sim_disk['disk_sep_sas_address'],
+            _disk_sep_sg_path=sim_disk['disk_sep_sg_path'])
 
     @_handle_errors
     def disks(self):

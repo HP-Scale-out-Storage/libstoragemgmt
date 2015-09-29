@@ -711,6 +711,7 @@ lsm_disk *lsm_disk_record_alloc(const char *id, const char *name,
         rc->disk_location = NULL;
         rc->disk_sas_address = NULL;
         rc->disk_sep_sas_address = NULL;
+        rc->disk_sep_sg_path = NULL;
 
         if (!rc->id || !rc->name || !rc->system_id) {
             lsm_disk_record_free(rc);
@@ -975,6 +976,12 @@ lsm_disk *lsm_disk_record_copy(lsm_disk * disk)
         rc = NULL;
     }
 
+    if ((disk->disk_sep_sg_path != NULL) &&
+        (lsm_disk_sep_sg_path_set(rc, disk->disk_sep_sg_path) != LSM_ERR_OK)) {
+        lsm_disk_record_free(rc);
+        rc = NULL;
+    }
+
     return rc;
 }
 
@@ -1006,6 +1013,9 @@ int lsm_disk_record_free(lsm_disk * d)
 
         if (d->disk_sep_sas_address != NULL)
             free((char *) d->disk_sep_sas_address);
+
+        if (d->disk_sep_sg_path != NULL)
+            free((char *) d->disk_sep_sg_path);
 
         free(d);
         return LSM_ERR_OK;
@@ -1232,6 +1242,37 @@ int lsm_disk_sep_sas_address_get(lsm_disk * disk, const char **sep_sas_addr)
     *sep_sas_addr = disk->disk_sep_sas_address;
 
     if (disk->disk_sep_sas_address[0] != '\0')
+        return LSM_ERR_OK;
+    else
+        return LSM_ERR_NO_SUPPORT;
+}
+
+int lsm_disk_sep_sg_path_set(lsm_disk * disk, const char *sep_sg_path)
+{
+    if ((disk == NULL) || (sep_sg_path == NULL) || (sep_sg_path[0] == '\0'))
+        return LSM_ERR_INVALID_ARGUMENT;
+
+    if (disk->disk_sep_sg_path != NULL)
+        free((char *) disk->disk_sep_sg_path);
+    disk->disk_sep_sg_path = strdup(sep_sg_path);
+    if (disk->disk_sep_sg_path == NULL)
+        return LSM_ERR_NO_MEMORY;
+
+    return LSM_ERR_OK;
+}
+
+int lsm_disk_sep_sg_path_get(lsm_disk * disk, const char **sep_sg_path)
+{
+    if ((disk == NULL) || (sep_sg_path == NULL))
+        return LSM_ERR_INVALID_ARGUMENT;
+
+    if (!LSM_IS_DISK(disk)) {
+        return LSM_ERR_INVALID_ARGUMENT;
+    }
+
+    *sep_sg_path = disk->disk_sep_sg_path;
+
+    if (disk->disk_sep_sg_path[0] != '\0')
         return LSM_ERR_OK;
     else
         return LSM_ERR_NO_SUPPORT;

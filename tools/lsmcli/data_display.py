@@ -449,6 +449,7 @@ class DisplayData(object):
     DISK_HEADER['disk_location'] = "Disk Location"
     DISK_HEADER['disk_sas_address'] = "Disk SAS Address"
     DISK_HEADER['disk_sep_sas_address'] = "SEP SAS Address"
+    DISK_HEADER['disk_sep_sg_path'] = "SEP SG Path"
 
     DISK_COLUMN_SKIP_KEYS = ['block_size', 'num_of_blocks']
 

@@ -153,6 +153,18 @@ int LSM_DLL_EXPORT lsm_disk_sas_address_get(lsm_disk *d,
 
 int LSM_DLL_EXPORT lsm_disk_sep_sas_address_get(lsm_disk *d,
                                              const char **sep_sas_addr);
+
+/**
+ * New in version 1.3. Retrieves a disk's sep scsi generic path.
+ * Do not free returned string, free the struct lsm_disk instead.
+ * @param d		Pointer to the disk of interest.
+ * @param sep_sg_path	Pointer to the disk's sep scsi generic path.
+ * @return LSM_ERR_OK on success, else error reason.
+ */
+
+int LSM_DLL_EXPORT lsm_disk_sep_sg_path_get(lsm_disk *d,
+                                             const char **sep_sg_path);
+
 /**
  * Returns the system id
  * Note: Return value is valid as long as disk pointer is valid.  It gets
