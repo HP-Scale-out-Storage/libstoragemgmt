@@ -200,7 +200,7 @@ def _parse_lsscsi_output(output):
         sas_addr = re.compile(
             "sas:(0x[A-Fa-f0-9]+)").search(cur_line)
         if sas_addr is not None:
-            lsscsi_entry['sas_addr'] = sas_addr.group(0)
+            lsscsi_entry['sas_addr'] = sas_addr.group(1)
         else:
             continue
         dev_type = re.compile(
@@ -223,6 +223,15 @@ def _get_sg_path(lsscsi_tg_output, sd_path):
 
     return "-"
 
+def _get_sas_addr(lsscsi_tg_output, sd_path):
+    """
+    Call lsscsi, look for a match with passed sd_node argument
+    """
+    for entry in lsscsi_tg_output:
+        if (entry['sd_path'] == sd_path):
+            return entry['sas_addr']
+
+    return "-"
 
 def _hp_size_to_lsm(hp_size):
     """
@@ -613,6 +622,7 @@ class SmartArray(IPlugin):
         if 'Disk Name' in hp_disk.keys():
             disk_sd_path = hp_disk['Disk Name']
             disk_sg_path = _get_sg_path(lsscsi_tg_out, disk_sd_path)
+            disk_sas_address = _get_sas_addr(lsscsi_tg_out, disk_sd_path)
             regex_match = re.compile("/dev/(sd[a-z]+)").search(disk_sd_path)
             if regex_match:
                 sd_name = regex_match.group(1)
@@ -621,11 +631,6 @@ class SmartArray(IPlugin):
                         "/sys/block/%s/device/path_info" % sd_name)
                 except IOError:
                     disk_location = "-"
-                try:
-                    disk_sas_address = file_read(
-                        "/sys/block/%s/device/sas_address" % sd_name)
-                except IOError:
-                    disk_sas_address = "-"
             disk_sep_sas_address = "-"
             disk_sep_sg_path = "-"
         else:
