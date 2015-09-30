@@ -190,7 +190,7 @@ def _parse_lsscsi_output(output):
         if sd_path is not None:
             lsscsi_entry['sd_path'] = sd_path.group(0)
         else:
-            continue
+            lsscsi_entry['sd_path'] = "-"
         sg_path = re.compile(
             "/dev/(sg[0-9]+)").search(cur_line)
         if sg_path is not None:
@@ -206,12 +206,46 @@ def _parse_lsscsi_output(output):
         dev_type = re.compile(
             "\[\d+\:\d+\:\d+\:\d+\]\s+(\w+)\s+").search(cur_line)
         if dev_type is not None:
-            lsscsi_entry['dev_type'] = dev_type.group(0)
+            lsscsi_entry['dev_type'] = dev_type.group(1)
         else:
             continue
         data.append(lsscsi_entry)
 
     return data
+
+def _parse_sg_ses_output(output):
+    """
+    Parse each sg_ses line based on predefined regex matching
+    """
+
+    data = []
+    output_lines = [
+        l for l in output.split("\n")]
+
+    for line_num in range(len(output_lines)):
+        cur_line = output_lines[line_num]
+        child_device = {}
+        if re.compile("attached").search(cur_line):
+            continue
+        sas_addr = re.compile(
+            "SAS address: (0x[A-Fa-f0-9]+)").search(cur_line)
+        if sas_addr is not None:
+            child_device['sas_addr'] = sas_addr.group(1)
+        else:
+            continue
+        data.append(child_device)
+
+    return data
+
+def _find_disk_in_sg_ses(sg_ses_output, sas_addr):
+    """
+    Call sg_ses, look for a match with passed sas_addr argument
+    """
+    for entry in sg_ses_output:
+        if (entry['sas_addr'] == sas_addr):
+            return True
+
+    return False
 
 def _get_sg_path(lsscsi_tg_output, sd_path):
     """
@@ -232,6 +266,17 @@ def _get_sas_addr(lsscsi_tg_output, sd_path):
             return entry['sas_addr']
 
     return "-"
+
+def _get_dev_type(lsscsi_tg_output, dev_type):
+    """
+    Call lsscsi, look for a match with passed sd_node argument
+    """
+    enclosure_list = []
+    for entry in lsscsi_tg_output:
+        if (entry['dev_type'] == dev_type):
+            enclosure_list.append(entry)
+
+    return enclosure_list
 
 def _hp_size_to_lsm(hp_size):
     """
@@ -337,10 +382,13 @@ class SmartArray(IPlugin):
         "/usr/sbin/hpssacli", "/opt/hp/hpssacli/bld/hpssacli"]
     _DEFAULT_BIN_PATHS_LSSCSI = [
         "/usr/bin/lsscsi", "/usr/sbin/lsscsi"]
+    _DEFAULT_BIN_PATHS_SG_SES = [
+        "/usr/bin/sg_ses", "/usr/sbin/sg_ses"]
 
     def __init__(self):
         self._sacli_bin = None
         self._lsscsi_bin = None
+        self._sg_ses_bin = None
 
     def _find_sacli(self):
         """
@@ -368,6 +416,19 @@ class SmartArray(IPlugin):
                 ErrorNumber.INVALID_ARGUMENT,
                 "lsscsi is not installed correctly")
 
+    def _find_sg_ses(self):
+        """
+        Try _DEFAULT_MDADM_BIN_PATHS
+        """
+        for cur_path in SmartArray._DEFAULT_BIN_PATHS_SG_SES:
+            if os.path.lexists(cur_path):
+                self._sg_ses_bin = cur_path
+
+        if not self._sg_ses_bin:
+            raise LsmError(
+                ErrorNumber.INVALID_ARGUMENT,
+                "sg_ses is not installed correctly")
+
     @_handle_errors
     def plugin_register(self, uri, password, timeout, flags=Client.FLAG_RSVD):
         if os.geteuid() != 0:
@@ -380,6 +441,8 @@ class SmartArray(IPlugin):
             self._find_sacli()
         if not self._lsscsi_bin:
             self._find_lsscsi()
+        if not self._sg_ses_bin:
+            self._find_sg_ses()
 
         self._sacli_exec(['version'], flag_convert=False)
 
@@ -469,6 +532,27 @@ class SmartArray(IPlugin):
 
         if flag_convert:
             return _parse_lsscsi_output(output)
+        else:
+            return output
+
+    def _sg_ses_exec(self, sg_ses_cmds, flag_convert=True):
+        """
+        If flag_convert is True, convert data into dict.
+        """
+        sg_ses_cmds.insert(0, self._sg_ses_bin)
+        try:
+            output = cmd_exec(sg_ses_cmds)
+        except OSError as os_error:
+            if os_error.errno == errno.ENOENT:
+                raise LsmError(
+                    ErrorNumber.INVALID_ARGUMENT,
+                    "sg_ses binary '%s' is not exist or executable." %
+                    self._sg_ses_bin)
+            else:
+                raise
+
+        if flag_convert:
+            return _parse_sg_ses_output(output)
         else:
             return output
 
@@ -609,8 +693,8 @@ class SmartArray(IPlugin):
         return search_property(lsm_vols, search_key, search_value)
 
     @staticmethod
-    def _hp_disk_to_lsm_disk(hp_disk, lsscsi_tg_out, sys_id, ctrl_num, key_name,
-                             flag_free=False):
+    def _hp_disk_to_lsm_disk(hp_disk, lsscsi_tg_out, sg_ses_outputs,
+                             sys_id, ctrl_num, key_name, flag_free=False):
         disk_id = hp_disk['Serial Number']
         disk_num = key_name[len("physicaldrive "):]
         disk_name = "%s %s" % (hp_disk['Model'], disk_num)
@@ -633,6 +717,11 @@ class SmartArray(IPlugin):
                     disk_location = "-"
             disk_sep_sas_address = "-"
             disk_sep_sg_path = "-"
+            for sg_ses_output in sg_ses_outputs:
+                if _find_disk_in_sg_ses(sg_ses_output['sg_ses_output'],
+                                        disk_sas_address):
+                    disk_sep_sas_address = sg_ses_output['sas_addr']
+                    disk_sep_sg_path = sg_ses_output['sg_path']
         else:
             disk_sd_path = "-"
             disk_sg_path = "-"
@@ -663,8 +752,20 @@ class SmartArray(IPlugin):
         rc_lsm_disks = []
         ctrl_all_conf = self._sacli_exec(
             ["ctrl", "all", "show", "config", "detail"])
+
         lsscsi_tg_output = self._lsscsi_exec(
             ["-tg"])
+        enclosure_devices = _get_dev_type(lsscsi_tg_output, 'enclosu')
+
+        sg_ses_outputs = []
+        for enclosure_device in enclosure_devices:
+            sg_ses_output = {}
+            sg_ses_output['sg_ses_output'] = self._sg_ses_exec(
+                ["-f", "-jj", "%s" % enclosure_device['sg_path']])
+            sg_ses_output['sg_path'] = enclosure_device['sg_path']
+            sg_ses_output['sas_addr'] = enclosure_device['sas_addr']
+            sg_ses_outputs.append(sg_ses_output)
+
         for ctrl_data in ctrl_all_conf.values():
             sys_id = ctrl_data['Serial Number']
             ctrl_num = ctrl_data['Slot']
@@ -675,7 +776,7 @@ class SmartArray(IPlugin):
                             rc_lsm_disks.append(
                                 SmartArray._hp_disk_to_lsm_disk(
                                     ctrl_data[key_name][array_key_name],
-                                    lsscsi_tg_output,
+                                    lsscsi_tg_output, sg_ses_outputs,
                                     sys_id, ctrl_num, array_key_name,
                                     flag_free=False))
 
@@ -685,7 +786,7 @@ class SmartArray(IPlugin):
                             rc_lsm_disks.append(
                                 SmartArray._hp_disk_to_lsm_disk(
                                     ctrl_data[key_name][array_key_name],
-                                    lsscsi_tg_output,
+                                    lsscsi_tg_output, sg_ses_outputs,
                                     sys_id, ctrl_num, array_key_name,
                                     flag_free=True))
 
