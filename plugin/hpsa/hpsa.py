@@ -848,6 +848,33 @@ class SmartArray(IPlugin):
         return None
 
     @_handle_errors
+    def disk_set_fault_led(self, disk, flags=Client.FLAG_RSVD):
+        """
+        """
+        if (not disk.disk_sas_address or
+            disk.disk_sas_address == '-'):
+            raise LsmError(ErrorNumber.INVALID_ARGUMENT,
+                "Missing disk_sas_address argument")
+
+        if (not disk.disk_sep_sg_path or
+            disk.disk_sep_sg_path == '-'):
+            raise LsmError(ErrorNumber.INVALID_ARGUMENT,
+                "Missing disk_sep_sg_path argument")
+
+        cmds = [
+            '--sas-addr=%s' % disk.disk_sas_address,
+            "--set=fault", '%s' % disk.disk_sep_sg_path]
+
+        try:
+            self._sg_ses_exec(cmds, flag_convert=False)
+        except ExecError:
+            raise LsmError(
+                ErrorNumber.NO_SUPPORT,
+                "disk_set_fault_led is not supported")
+
+        return None
+
+    @_handle_errors
     def volume_raid_info(self, volume, flags=Client.FLAG_RSVD):
         """
         Depend on command:

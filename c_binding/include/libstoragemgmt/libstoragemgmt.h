@@ -317,6 +317,18 @@ int LSM_DLL_EXPORT lsm_disk_clear_ident_led(lsm_connect *c,
                                             lsm_flag flags);
 
 /**
+ * Enable the FAULT LED for the desired disk.
+ * New in version 1.3, only available for hardware RAID and HBA cards.
+ * @param[in] c				Valid connection
+ * @param[in] disk			A single lsm_disk
+ * @param[in] flags			Reserved, set to 0
+ * @return LSM_ERR_OK on success else error reason.
+ */
+int LSM_DLL_EXPORT lsm_disk_set_fault_led(lsm_connect *c,
+                                          lsm_disk *disk,
+                                          lsm_flag flags);
+
+/**
  * Creates a new volume (aka. LUN).
  * @param[in]   conn            Valid connection @see lsm_connect_password
  * @param[in]   pool            Valid pool @see lsm_pool (OPTIONAL, use NULL

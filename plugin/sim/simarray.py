@@ -1845,6 +1845,10 @@ class SimArray(object):
         return None
 
     @_handle_errors
+    def disk_set_fault_led(self, disk, flags=0):
+        return None
+
+    @_handle_errors
     def volume_create(self, pool_id, vol_name, size_bytes, thinp, flags=0,
                       _internal_use=False, _is_hw_raid_vol=0):
         """

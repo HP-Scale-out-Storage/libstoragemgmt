@@ -744,6 +744,17 @@ def disk_clear_ident_led_test(cap):
     return
 
 
+def disk_set_fault_led_test(cap):
+    if cap['DISK_LED']:
+        out = call([cmd, '-t' + sep, 'list', '--type', 'disks'])[1]
+        disk_list = parse(out)
+        for disk in disk_list:
+            out = call([
+                cmd, '-t' + sep, 'disk-set-fault-led', '--disk', disk[0]])[1]
+
+    return
+
+
 def volume_raid_create_test(cap, system_id):
     if cap['VOLUME_RAID_CREATE']:
         out = call(
