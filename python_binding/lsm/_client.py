@@ -506,6 +506,32 @@ class Client(INetworkAttachedStorage):
         _check_search_key(search_key, Disk.SUPPORTED_SEARCH_KEYS)
         return self._tp.rpc('disks', _del_self(locals()))
 
+    ## Create a disk RAID pool and allocate entire storage space to new volume
+    # @param    self            The this pointer
+    # @param    disk            Disk object to target
+    # @param    flags           Flags
+    # @returns  lsmError on errors
+    @_return_requires(unicode)
+    def disk_set_ident_led(self, disk, flags=FLAG_RSVD):
+        """
+        lsm.Client.disk_set_ident_led(self, disk, flags=lsm.Client.FLAG_RSVD)
+
+        Version:
+            1.3
+        Usage:
+            This method enables the IDENT LED on a physical disk if supported
+        Parameters:
+            disk (lsm.Disk)
+                An lsm.Disk object.
+            flags (int)
+                Optional. Reserved for future use.
+                Should be set as lsm.Client.FLAG_RSVD.
+        Returns:
+            lsm.ErrorNumber.OK
+        SpecialExceptions:
+        """
+        return self._tp.rpc('disk_set_ident_led', _del_self(locals()))
+
     ## Access control for allowing an access group to access a volume
     # @param    self            The this pointer
     # @param    access_group    The access group

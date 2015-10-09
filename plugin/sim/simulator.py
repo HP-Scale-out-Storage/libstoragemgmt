@@ -111,6 +111,9 @@ class SimPlugin(INfs, IStorageAreaNetwork):
             [SimPlugin._sim_data_2_lsm(d) for d in sim_disks],
             search_key, search_value)
 
+    def disk_set_ident_led(self, disk, flags=0):
+        return self.sim_array.disk_set_ident_led(disk)
+
     def volume_create(self, pool, volume_name, size_bytes, provisioning,
                       flags=0):
         sim_vol = self.sim_array.volume_create(

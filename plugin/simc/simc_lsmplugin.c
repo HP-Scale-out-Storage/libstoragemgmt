@@ -401,6 +401,7 @@ static int cap(lsm_plugin_ptr c, lsm_system * system,
                                   LSM_CAP_EXPORT_FS,
                                   LSM_CAP_EXPORT_REMOVE,
                                   LSM_CAP_VOLUME_RAID_INFO,
+                                  LSM_CAP_DISK_LED,
                                   LSM_CAP_VOLUME_LED,
                                   LSM_CAP_POOL_MEMBER_INFO, -1);
 
@@ -619,6 +620,12 @@ static int list_disks(lsm_plugin_ptr c, const char *search_key,
     }
 
     return rc;
+}
+
+static int disk_set_ident_led(lsm_plugin_ptr c, lsm_disk * disk,
+                              lsm_flag flags)
+{
+    return LSM_ERR_OK;
 }
 
 static int list_targets(lsm_plugin_ptr c, const char *search_key,
@@ -1071,6 +1078,7 @@ static struct lsm_ops_v1_2 ops_v1_2 = {
 static struct lsm_ops_v1_3 ops_v1_3 = {
     volume_ident_led_set,
     volume_ident_led_clear,
+    disk_set_ident_led,
 };
 
 static int volume_enable_disable(lsm_plugin_ptr c, lsm_volume * v,

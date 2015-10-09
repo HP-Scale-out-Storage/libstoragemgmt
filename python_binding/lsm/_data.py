@@ -875,6 +875,7 @@ class Capabilities(IData):
     DISK_SG_PATH = 165
     DISK_SEP_SAS_ADDR = 166
     DISK_SEP_SG_PATH = 167
+    DISK_LED = 168
     VOLUME_LED = 171
 
     POOLS_QUICK_SEARCH = 210

@@ -1054,6 +1054,23 @@ int lsm_disk_list(lsm_connect * c, const char *search_key,
     return get_disk_array(c, rc, response, disks, count);
 }
 
+int lsm_disk_set_ident_led(lsm_connect * c, lsm_disk * disk,
+                           lsm_flag flags)
+{
+    CONN_SETUP(c);
+
+    std::map < std::string, Value > p;
+    p["flags"] = Value(flags);
+    p["disk"] = disk_to_value(disk);
+
+    Value parameters(p);
+    Value response;
+
+    int rc = rpc(c, "disk_set_ident_led", parameters, response);
+
+    return rc;
+}
+
 typedef void *(*convert) (Value & v);
 
 static void *parse_job_response(lsm_connect * c, Value response, int &rc,

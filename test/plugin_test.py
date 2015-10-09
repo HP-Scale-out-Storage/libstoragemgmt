@@ -446,6 +446,16 @@ class TestPlugin(unittest.TestCase):
                                     "Disk sep scsi generic node retrieval"
                                     "failed")
 
+    def test_disk_set_ident_led(self):
+        for s in self.systems:
+            cap = self.c.capabilities(s)
+            if supported(cap, [Cap.DISK_LED]):
+                for disk in self.c.disks():
+                    disk_led_status = self.c.disk_set_ident_led(disk)
+                    self.assertTrue(disk_led_status is None,
+                                    "Disk set_ident_led"
+                                    "failed")
+
     def _volume_create(self, system_id,
                        element_type=lsm.Pool.ELEMENT_TYPE_VOLUME,
                        unsupported_features=0):
