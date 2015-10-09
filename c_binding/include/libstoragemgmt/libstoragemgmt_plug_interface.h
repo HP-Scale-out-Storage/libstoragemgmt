@@ -236,6 +236,18 @@ typedef int (*lsm_plug_disk_set_ident_led) (lsm_plugin_ptr c,
                                             lsm_flag flags);
 
 /**
+ * Disable the IDENT LED for the desired disk.
+ * New in version 1.3, only available for hardware RAID and HBA cards.
+ * @param[in] c			Valid lsm plug-in pointer
+ * @param[in] disk		A single lsm_disk
+ * @param[in] flags         	Reserved, set to 0
+ * @return LSM_ERR_OK on success else error reason.
+ */
+typedef int (*lsm_plug_disk_clear_ident_led) (lsm_plugin_ptr c,
+                                              lsm_disk * disk,
+                                              lsm_flag flags);
+
+/**
  * Retrieve a list of target ports.
  * @param[in]   c                   Valid lsm plugin-in pointer
  * @param[in]   search_key          Search key
@@ -1037,6 +1049,7 @@ struct lsm_ops_v1_3 {
     lsm_plug_volume_ident_led_set vol_ident_set;
     lsm_plug_volume_ident_led_clear vol_ident_clear;
     lsm_plug_disk_set_ident_led disk_set_ident;
+    lsm_plug_disk_clear_ident_led disk_clear_ident;
 };
 
 /**

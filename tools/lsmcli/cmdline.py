@@ -255,6 +255,15 @@ cmds = (
     ),
 
     dict(
+        name='disk-clear-ident-led',
+        help='Disable the IDENT LED on a disk',
+        args=[
+            dict(name="--disk", metavar='<DISK>',
+                 help='Targeted disk.\n'),
+        ],
+    ),
+
+    dict(
         name='volume-raid-create',
         help='Creates a RAIDed volume on hardware RAID',
         args=[
@@ -698,6 +707,7 @@ aliases = (
     ['p', 'plugin-info'],
     ['vc', 'volume-create'],
     ['dsil', 'disk-set-ident-led'],
+    ['dcil', 'disk-clear-ident-led'],
     ['vrc', 'volume-raid-create'],
     ['vrcc', 'volume-raid-create-cap'],
     ['vd', 'volume-delete'],
@@ -1429,6 +1439,18 @@ class CmdLine:
 
         self.display_data([
             self.c.disk_set_ident_led(lsm_disk)])
+
+    def disk_clear_ident_led(self, args):
+        all_lsm_disks = self.c.disks()
+        lsm_disk = next((d for d in all_lsm_disks if d.id in args.disk), None)
+        #if len(lsm_disk) != len(args.disk):
+        #    raise LsmError(
+        #        ErrorNumber.NOT_FOUND_DISK,
+        #        "Disk ID %s not found" %
+        #        ', '.join(set(args.disk) - set(d.id for d in all_lsm_disks)))
+
+        self.display_data([
+            self.c.disk_clear_ident_led(lsm_disk)])
 
     def volume_raid_create(self, args):
         raid_type = VolumeRAIDInfo.raid_type_str_to_lsm(args.raid_type)
