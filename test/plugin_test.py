@@ -476,6 +476,16 @@ class TestPlugin(unittest.TestCase):
                                     "Disk set_fault_led"
                                     "failed")
 
+    def test_disk_clear_fault_led(self):
+        for s in self.systems:
+            cap = self.c.capabilities(s)
+            if supported(cap, [Cap.DISK_LED]):
+                for disk in self.c.disks():
+                    disk_led_status = self.c.disk_clear_fault_led(disk)
+                    self.assertTrue(disk_led_status is None,
+                                    "Disk clear_fault_led"
+                                    "failed")
+
     def _volume_create(self, system_id,
                        element_type=lsm.Pool.ELEMENT_TYPE_VOLUME,
                        unsupported_features=0):

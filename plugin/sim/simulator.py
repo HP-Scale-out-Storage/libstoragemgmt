@@ -120,6 +120,9 @@ class SimPlugin(INfs, IStorageAreaNetwork):
     def disk_set_fault_led(self, disk, flags=0):
         return self.sim_array.disk_set_fault_led(disk)
 
+    def disk_clear_fault_led(self, disk, flags=0):
+        return self.sim_array.disk_clear_fault_led(disk)
+
     def volume_create(self, pool, volume_name, size_bytes, provisioning,
                       flags=0):
         sim_vol = self.sim_array.volume_create(

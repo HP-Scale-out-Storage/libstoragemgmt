@@ -780,6 +780,30 @@ static int handle_disk_set_fault_led(lsm_plugin_ptr p, Value & params,
     return rc;
 }
 
+static int handle_disk_clear_fault_led(lsm_plugin_ptr p, Value & params,
+                                     Value & response)
+{
+    int rc = LSM_ERR_NO_SUPPORT;
+    if (p && p->ops_v1_3 && p->ops_v1_3->disk_clear_fault) {
+        Value v_disk = params["disk"];
+
+        if (Value::object_t == v_disk.valueType() &&
+            LSM_FLAG_EXPECTED_TYPE(params)) {
+
+            lsm_disk *disk = value_to_disk(v_disk);
+
+            rc = p->ops_v1_3->disk_clear_fault(p, disk,
+                                               LSM_FLAG_GET_VALUE(params));
+
+            lsm_disk_record_free(disk);
+
+        } else {
+            rc = LSM_ERR_TRANSPORT_INVALID_ARG;
+        }
+    }
+    return rc;
+}
+
 static int handle_volume_create(lsm_plugin_ptr p, Value & params,
                                 Value & response)
 {
@@ -2499,6 +2523,7 @@ static std::map < std::string, handler > dispatch =
     ("disk_set_ident_led", handle_disk_set_ident_led)
     ("disk_clear_ident_led", handle_disk_clear_ident_led)
     ("disk_set_fault_led", handle_disk_set_fault_led)
+    ("disk_clear_fault_led", handle_disk_clear_fault_led)
     ("export_auth", export_auth)
     ("export_fs", export_fs)
     ("export_remove", export_remove)

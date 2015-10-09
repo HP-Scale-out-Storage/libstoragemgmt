@@ -584,6 +584,32 @@ class Client(INetworkAttachedStorage):
         """
         return self._tp.rpc('disk_set_fault_led', _del_self(locals()))
 
+    ## Clear the FAULT LED for a physical disk.
+    # @param    self            The this pointer
+    # @param    disk            Disk object to target
+    # @param    flags           Flags
+    # @returns  lsmError on errors
+    @_return_requires(unicode)
+    def disk_clear_fault_led(self, disk, flags=FLAG_RSVD):
+        """
+        lsm.Client.disk_clear_fault_led(self, disk, flags=lsm.Client.FLAG_RSVD)
+
+        Version:
+            1.3
+        Usage:
+            This method disables the FAULT LED on a physical disk if supported
+        Parameters:
+            disk (lsm.Disk)
+                An lsm.Disk object.
+            flags (int)
+                Optional. Reserved for future use.
+                Should be set as lsm.Client.FLAG_RSVD.
+        Returns:
+                None
+        SpecialExceptions:
+        """
+        return self._tp.rpc('disk_clear_fault_led', _del_self(locals()))
+
     ## Access control for allowing an access group to access a volume
     # @param    self            The this pointer
     # @param    access_group    The access group

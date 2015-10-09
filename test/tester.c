@@ -1363,6 +1363,21 @@ START_TEST(test_disk_set_fault_led)
 }
 END_TEST
 
+START_TEST(test_disk_clear_fault_led)
+{
+    int rc;
+
+    lsm_disk **disks = NULL;
+    uint32_t disk_count = 0;
+
+    G(rc, lsm_disk_list, c, NULL, NULL, &disks, &disk_count, 0);
+
+    G(rc, lsm_disk_clear_fault_led, c, disks[0], LSM_CLIENT_FLAG_RSVD);
+
+    G(rc, lsm_disk_record_array_free, disks, disk_count);
+}
+END_TEST
+
 START_TEST(test_nfs_exports)
 {
     fail_unless(c != NULL);
@@ -3435,6 +3450,7 @@ Suite * lsm_suite(void)
     tcase_add_test(basic, test_disk_set_ident_led);
     tcase_add_test(basic, test_disk_clear_ident_led);
     tcase_add_test(basic, test_disk_set_fault_led);
+    tcase_add_test(basic, test_disk_clear_fault_led);
     tcase_add_test(basic, test_plugin_info);
     tcase_add_test(basic, test_system_fw_version);
     tcase_add_test(basic, test_system_mode);

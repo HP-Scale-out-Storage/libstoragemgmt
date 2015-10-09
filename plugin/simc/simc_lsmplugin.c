@@ -640,6 +640,12 @@ static int disk_set_fault_led(lsm_plugin_ptr c, lsm_disk * disk,
     return LSM_ERR_OK;
 }
 
+static int disk_clear_fault_led(lsm_plugin_ptr c, lsm_disk * disk,
+                                lsm_flag flags)
+{
+    return LSM_ERR_OK;
+}
+
 static int list_targets(lsm_plugin_ptr c, const char *search_key,
                         const char *search_value, lsm_target_port ** tp[],
                         uint32_t * count, lsm_flag flags)
@@ -1093,6 +1099,7 @@ static struct lsm_ops_v1_3 ops_v1_3 = {
     disk_set_ident_led,
     disk_clear_ident_led,
     disk_set_fault_led,
+    disk_clear_fault_led,
 };
 
 static int volume_enable_disable(lsm_plugin_ptr c, lsm_volume * v,
