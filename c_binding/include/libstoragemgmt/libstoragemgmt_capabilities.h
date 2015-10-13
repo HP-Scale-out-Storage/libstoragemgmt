@@ -173,6 +173,8 @@ typedef enum {
     /**^ Plugin-in allows user to retrieve sep scsi generic path */
     LSM_CAP_DISK_LED = 168,
     /**^ Plugin allows user to set and clear physical disk LEDs */
+    LSM_CAP_VOLUME_SD_PATH = 169,
+    /**^ Plugin-in allows user to retrieve scsi device path */
     LSM_CAP_VOLUME_LED = 171,
     /**^ Plugin allows user to set and clear volume LEDs */
 
