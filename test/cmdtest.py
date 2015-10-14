@@ -794,7 +794,7 @@ def volume_raid_create_test(cap, system_id):
 
         volume = parse(out)
         vol_id = volume[0][0]
-        pool_id = volume[0][-3]
+        pool_id = volume[0][-4]
 
         if cap['VOLUME_RAID_INFO']:
             out = call(

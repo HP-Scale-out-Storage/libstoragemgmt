@@ -45,6 +45,7 @@ static char disk_sas_address[] = "0xFEDCBA9876543210";
 static char disk_sep_sas_address[] = "0xFEDCBA9876543000";
 static char disk_sep_sg_path[] = "/dev/sg100";
 static char vol_sd_path[] = "/dev/sdq";
+static char vol_sg_path[] = "/dev/sg22";
 
 #define BS 512
 #define MAX_SYSTEMS 1
@@ -789,6 +790,7 @@ static int volume_create(lsm_plugin_ptr c, lsm_pool * pool,
                                     BS, allocated_size/BS, 0, sys_id,
                                     lsm_pool_id_get(pool), NULL);
                 lsm_volume_sd_path_set(v, vol_sd_path);
+                lsm_volume_sg_path_set(v, vol_sg_path);
 
                 lsm_volume *to_store = lsm_volume_record_copy(v);
                 struct allocated_volume *av =

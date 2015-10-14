@@ -119,6 +119,16 @@ char LSM_DLL_EXPORT *lsm_volume_pool_id_get(lsm_volume *v);
 int LSM_DLL_EXPORT lsm_volume_sd_path_get(lsm_volume *v,
                                              const char **sd_path);
 
+/**
+ * New in version 1.3. Retrieves a volumes's scsi generic path.
+ * Do not free returned string, free the struct lsm_volume instead.
+ * @param v		Pointer to the volume of interest.
+ * @param sd_path	Pointer to the volume's scsi generic path.
+ * @return LSM_ERR_OK on success, else error reason.
+ */
+int LSM_DLL_EXPORT lsm_volume_sg_path_get(lsm_volume *v,
+                                          const char **sg_path);
+
 
 #ifdef  __cplusplus
 }

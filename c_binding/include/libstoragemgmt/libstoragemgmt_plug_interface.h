@@ -1399,6 +1399,15 @@ int LSM_DLL_EXPORT lsm_volume_sd_path_set(lsm_volume *vol,
                                               const char *sd_path);
 
 /**
+ * New in version 1.3. Set a volume's scsi generic path.
+ * @param vol		Pointer to the volume of interest.
+ * @param sg_path	Pointer to the volume's scsi generic path.
+ * @return LSM_ERR_OK on success, else error reason.
+ */
+int LSM_DLL_EXPORT lsm_volume_sg_path_set(lsm_volume *vol,
+                                          const char *sg_path);
+
+/**
  * Allocate the storage needed for and array of System records.
  * @param size      Number of elements.
  * @return Allocated memory or NULL on error.

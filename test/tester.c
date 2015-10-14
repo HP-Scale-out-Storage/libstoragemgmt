@@ -3450,6 +3450,37 @@ START_TEST(test_volume_sd_path)
 }
 END_TEST
 
+START_TEST(test_volume_sg_path)
+{
+    lsm_volume *volume = NULL;
+    char *job = NULL;
+    const char *sg_path = NULL;
+    lsm_pool *pool = get_test_pool(c);
+
+    int rc = lsm_volume_create(
+        c, pool, "volume_raid_info_test", 20000000,
+        LSM_VOLUME_PROVISION_DEFAULT, &volume, &job, LSM_CLIENT_FLAG_RSVD);
+
+    fail_unless( rc == LSM_ERR_OK || rc == LSM_ERR_JOB_STARTED,
+            "lsmVolumeCreate %d (%s)", rc, error(lsm_error_last_get(c)));
+
+    if( LSM_ERR_JOB_STARTED == rc ) {
+        volume = wait_for_job_vol(c, &job);
+    }
+
+    G(rc, lsm_volume_sg_path_get, volume, &sg_path);
+
+    if (LSM_ERR_OK == rc && sg_path != NULL)
+        printf("SCSI generic path: (%s)\n", sg_path);
+
+    rc = lsm_volume_sg_path_get(volume, NULL);
+    fail_unless(LSM_ERR_INVALID_ARGUMENT == rc, "rc = %d", rc);
+
+    G(rc, lsm_volume_record_free, volume);
+    G(rc, lsm_pool_record_free, pool);
+}
+END_TEST
+
 Suite * lsm_suite(void)
 {
     Suite *s = suite_create("libStorageMgmt");
@@ -3504,6 +3535,7 @@ Suite * lsm_suite(void)
     tcase_add_test(basic, test_volume_ident_led_set);
     tcase_add_test(basic, test_volume_ident_led_clear);
     tcase_add_test(basic, test_volume_sd_path);
+    tcase_add_test(basic, test_volume_sg_path);
 
     suite_add_tcase(s, basic);
     return s;

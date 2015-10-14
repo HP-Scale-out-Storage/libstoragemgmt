@@ -492,6 +492,7 @@ class SmartArray(IPlugin):
         cap.set(Capabilities.DISK_SEP_SG_PATH)
         cap.set(Capabilities.DISK_LED)
         cap.set(Capabilities.VOLUME_SD_PATH)
+        cap.set(Capabilities.VOLUME_SG_PATH)
         cap.set(Capabilities.VOLUME_LED)
         return cap
 
@@ -639,8 +640,8 @@ class SmartArray(IPlugin):
         return search_property(lsm_pools, search_key, search_value)
 
     @staticmethod
-    def _hp_ld_to_lsm_vol(hp_ld, pool_id, sys_id, ctrl_num, array_num,
-                          hp_ld_name):
+    def _hp_ld_to_lsm_vol(hp_ld, lsscsi_tg_out, pool_id, sys_id, ctrl_num,
+                          array_num, hp_ld_name):
         ld_num = hp_ld_name[len("Logical Drive: "):]
         vpd83 = hp_ld['Unique Identifier'].lower()
         # No document or command output indicate block size
@@ -650,12 +651,14 @@ class SmartArray(IPlugin):
         vol_name = hp_ld_name
         if regex_match:
             vol_sd_path = hd_ld['Disk Name']
+            vol_sg_path = _get_sg_path(lsscsi_tg_out, vol_sd_path)
             sd_name = regex_match.group(1)
             block_size = int(file_read(
                 "/sys/block/%s/queue/logical_block_size" % sd_name))
             num_of_blocks = int(file_read("/sys/block/%s/size" % sd_name))
             vol_name += ": /dev/%s" % sd_name
         else:
+            vol_sg_path = "-"
             block_size = 512
             num_of_blocks = int(_hp_size_to_lsm(hp_ld['Size']) / block_size)
 
@@ -665,7 +668,7 @@ class SmartArray(IPlugin):
         return Volume(
             vpd83, vol_name, vpd83, block_size, num_of_blocks,
             Volume.ADMIN_STATE_ENABLED, sys_id, pool_id, plugin_data,
-            _vol_sd_path = vol_sd_path)
+            _vol_sd_path = vol_sd_path, _vol_sg_path = vol_sg_path)
 
     @_handle_errors
     def volumes(self, search_key=None, search_value=None,
@@ -677,6 +680,8 @@ class SmartArray(IPlugin):
         lsm_vols = []
         ctrl_all_conf = self._sacli_exec(
             ["ctrl", "all", "show", "config", "detail"])
+        lsscsi_tg_output = self._lsscsi_exec(
+            ["-tg"])
         for ctrl_data in ctrl_all_conf.values():
             ctrl_num = ctrl_data['Slot']
             sys_id = ctrl_data['Serial Number']
@@ -691,8 +696,8 @@ class SmartArray(IPlugin):
                     lsm_vols.append(
                         SmartArray._hp_ld_to_lsm_vol(
                             ctrl_data[key_name][array_key_name],
-                            pool_id, sys_id, ctrl_num, array_num,
-                            array_key_name))
+                            lsscsi_tg_output, pool_id, sys_id, ctrl_num,
+                            array_num, array_key_name))
 
         return search_property(lsm_vols, search_key, search_value)
 

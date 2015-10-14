@@ -382,7 +382,7 @@ class Volume(IData):
 
     def __init__(self, _id, _name, _vpd83, _block_size, _num_of_blocks,
                  _admin_state, _system_id, _pool_id, _plugin_data=None,
-                 _vol_sd_path=''):
+                 _vol_sd_path='', _vol_sg_path=''):
         self._id = _id                        # Identifier
         self._name = _name                    # Human recognisable name
         if _vpd83 and not Volume.vpd83_verify(_vpd83):
@@ -398,6 +398,7 @@ class Volume(IData):
         self._pool_id = _pool_id              # Pool id this volume belongs
         self._plugin_data = _plugin_data
         self._vol_sd_path = _vol_sd_path
+        self._vol_sg_path = _vol_sg_path
 
     @property
     def size_bytes(self):
@@ -428,6 +429,17 @@ class Volume(IData):
                            "Volume.vol_sd_path() is not supported by this "
                            "plugin yet")
         return self._vol_sd_path
+
+    @property
+    def vol_sg_path(self):
+        """
+        scsi generic node path.
+        """
+        if self._vol_sg_path == '':
+            raise LsmError(ErrorNumber.NO_SUPPORT,
+                           "Volume.vol_sg_path() is not supported by this "
+                           "plugin yet")
+        return self._vol_sg_path
 
 
 @default_property('id', doc="Unique identifier")
@@ -890,6 +902,7 @@ class Capabilities(IData):
     DISK_SEP_SG_PATH = 167
     DISK_LED = 168
     VOLUME_SD_PATH = 169
+    VOLUME_SG_PATH = 170
     VOLUME_LED = 171
 
     POOLS_QUICK_SEARCH = 210

@@ -676,6 +676,7 @@ lsm_volume *lsm_volume_record_alloc(const char *id, const char *name,
         rc->system_id = strdup(system_id);
         rc->pool_id = strdup(pool_id);
         rc->vol_sd_path = NULL;
+        rc->vol_sg_path = NULL;
 
         if (plugin_data) {
             rc->plugin_data = strdup(plugin_data);
@@ -898,6 +899,12 @@ lsm_volume *lsm_volume_record_copy(lsm_volume * vol)
         rc = NULL;
     }
 
+    if ((vol->vol_sg_path != NULL) &&
+        (lsm_volume_sg_path_set(rc, vol->vol_sg_path) != LSM_ERR_OK)) {
+        lsm_volume_record_free(rc);
+        rc = NULL;
+    }
+
     return rc;
 }
 
@@ -936,6 +943,9 @@ int lsm_volume_record_free(lsm_volume * v)
 
         if (v->vol_sd_path != NULL)
             free((char *) v->vol_sd_path);
+
+        if (v->vol_sg_path != NULL)
+            free((char *) v->vol_sg_path);
 
         free(v);
         return LSM_ERR_OK;
@@ -1129,6 +1139,37 @@ int lsm_volume_sd_path_get(lsm_volume * vol, const char **sd_path)
     *sd_path = vol->vol_sd_path;
 
     if (vol->vol_sd_path[0] != '\0')
+        return LSM_ERR_OK;
+    else
+        return LSM_ERR_NO_SUPPORT;
+}
+
+int lsm_volume_sg_path_set(lsm_volume * vol, const char *sg_path)
+{
+    if ((vol == NULL) || (sg_path == NULL) || (sg_path[0] == '\0'))
+        return LSM_ERR_INVALID_ARGUMENT;
+
+    if (vol->vol_sg_path != NULL)
+        free((char *) vol->vol_sg_path);
+    vol->vol_sg_path = strdup(sg_path);
+    if (vol->vol_sg_path == NULL)
+        return LSM_ERR_NO_MEMORY;
+
+    return LSM_ERR_OK;
+}
+
+int lsm_volume_sg_path_get(lsm_volume * vol, const char **sg_path)
+{
+    if ((vol == NULL) || (sg_path == NULL))
+        return LSM_ERR_INVALID_ARGUMENT;
+
+    if (!LSM_IS_VOL(vol)) {
+        return LSM_ERR_INVALID_ARGUMENT;
+    }
+
+    *sg_path = vol->vol_sg_path;
+
+    if (vol->vol_sg_path[0] != '\0')
         return LSM_ERR_OK;
     else
         return LSM_ERR_NO_SUPPORT;

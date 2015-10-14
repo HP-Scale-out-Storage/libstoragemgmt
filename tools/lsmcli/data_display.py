@@ -419,6 +419,7 @@ class DisplayData(object):
     VOL_HEADER['pool_id'] = 'Pool ID'
     VOL_HEADER['system_id'] = 'System ID'
     VOL_HEADER['vol_sd_path'] = 'Volume SD Node'
+    VOL_HEADER['vol_sg_path'] = 'Volume SG Path'
 
     VOL_COLUMN_SKIP_KEYS = ['block_size', 'num_of_blocks']
 
