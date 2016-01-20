@@ -580,7 +580,7 @@ class SmartArray(IPlugin):
             plugin_data = "%s" % ctrl_data['Slot']
             fw_ver = "%s" % ctrl_data['Firmware Version']
             hwraid_mode = ctrl_data['Controller Mode']
-            if hwraid_mode == 'RAID':
+            if hwraid_mode == 'RAID' or hwraid_mode == 'RAID Mode':
                 mode = System.MODE_HARDWARE_RAID
             elif hwraid_mode == 'HBA':
                 mode = System.MODE_HBA
