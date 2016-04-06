@@ -59,7 +59,7 @@ Requires:       %{libstoragemgmt}-python
 Requires:       lsscsi >= 0.28
 Requires:       sg3_utils = 1.41
 Requires:       hpssacli
-Requires:       kmod-hpsa >= 3.4.14-116
+Requires:       kmod-hpsa >= 3.4.14-115
 BuildRequires:  autoconf automake libtool libxml2-devel check-devel perl
 BuildRequires:  openssl-devel
 BuildRequires:  python-argparse
